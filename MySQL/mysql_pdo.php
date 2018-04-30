@@ -45,7 +45,7 @@ function RunInsertQuery($connection, $tablename, $jsonNewRow, $ignoreIfDuplicate
                 return 'insert failed: '.$connection->errorInfo();
             }
 
-            return 'Data isn\t in Array format';
+            return 'Data isn\'t in Array format';
         }
 
         return 'No data to be inputted into the table';
@@ -89,7 +89,7 @@ function RunMultipleInsertQuery($connection, $tablename, $arrayColumnNames, $jso
                     }
                 }
 
-                return 'Data isn\t in Array format';
+                return 'Data isn\'t in Array format';
             }
 
             return 'Please provide the name of the columns in Array format';
@@ -170,7 +170,7 @@ function RunUpdateQuery($connection, $tablename, $jsonNewRow, $whereQuery = '', 
                 return 'update failed: '.$connection->errorInfo();
             }
 
-            return 'Data isn\t in Array format';
+            return 'Data isn\'t in Array format';
         }
 
         return 'No data to be inputted into the table';
