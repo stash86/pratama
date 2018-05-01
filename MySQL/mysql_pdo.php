@@ -88,10 +88,10 @@ function RunMultipleInsertQuery($connection, $tablename, $arrayColumnNames, $jso
                         }
                     }
                     if (empty($errorLog)) {
-				        return 'Insert success.';
-				    }
+                        return 'Insert success.';
+                    }
 
-				    return $errorLog;
+                    return $errorLog;
                 }
 
                 return 'Data isn\'t in Array format';
@@ -104,7 +104,6 @@ function RunMultipleInsertQuery($connection, $tablename, $arrayColumnNames, $jso
     }
 
     return 'Please provide the name of the database table';
-    
 }
 
 function RunRawSelectQuery($connection, $sqlQuery)
