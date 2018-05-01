@@ -87,6 +87,11 @@ function RunMultipleInsertQuery($connection, $tablename, $arrayColumnNames, $jso
                             $errorLog .= 'insert failed: '.$connection->errorInfo().PHP_EOL;
                         }
                     }
+                    if (empty($errorLog)) {
+				        return 'Insert success.';
+				    }
+
+				    return $errorLog;
                 }
 
                 return 'Data isn\'t in Array format';
@@ -99,12 +104,7 @@ function RunMultipleInsertQuery($connection, $tablename, $arrayColumnNames, $jso
     }
 
     return 'Please provide the name of the database table';
-
-    if (empty($errorLog)) {
-        return 'Insert success.';
-    }
-
-    return $errorLog;
+    
 }
 
 function RunRawSelectQuery($connection, $sqlQuery)
