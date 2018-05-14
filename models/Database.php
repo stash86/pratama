@@ -16,7 +16,8 @@ class Database
 
             return $pdo_instance_read;
         } catch (PDOException $e) {
-            echo 'Connection failed: '.$e->getMessage();
+            $errorMsg = $e->getMessage();
+            echo 'Connection failed: '.$errorMsg;
         }
     }
 
