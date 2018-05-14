@@ -16,8 +16,8 @@ class Database
 
             return $pdo_instance_read;
         } catch (PDOException $e) {
-        	$errorMsg = htmlentities($e->getMessage());
-            echo "Connection failed: $errorMsg";
+        	$errorMsg = $e->getMessage();
+            echo htmlentities("Connection failed: $errorMsg");
         }
     }
 
@@ -35,8 +35,8 @@ class Database
 
             return $pdo_instance_write;
         } catch (PDOException $e) {
-        	$errorMsg = htmlentities($e->getMessage());
-            echo "Connection failed: $errorMsg";
+        	$errorMsg = $e->getMessage();
+            echo htmlentities("Connection failed: $errorMsg");
         }
     }
 
