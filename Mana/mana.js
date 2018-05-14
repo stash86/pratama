@@ -1,9 +1,9 @@
 function replaceMagicSymbol($original, $withShadow)
 {
-	$new=$original;
-	if($new !== null && $new !=='')
+	var $new=$original;
+	if($new !== null && $new !=="")
 	{
-		$stringManaCost = "ms-cost";
+		var $stringManaCost = "ms-cost";
 		if($withShadow === true)
 		{
 			$stringManaCost+=" ms-shadow";
