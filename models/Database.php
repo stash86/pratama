@@ -16,7 +16,7 @@ class Database
 
             return $pdo_instance_read;
         } catch (PDOException $e) {
-        	$errorMsg = $e->getMessage();
+            $errorMsg = $e->getMessage();
             echo htmlentities("Connection failed: $errorMsg");
         }
     }
@@ -35,7 +35,7 @@ class Database
 
             return $pdo_instance_write;
         } catch (PDOException $e) {
-        	$errorMsg = $e->getMessage();
+            $errorMsg = $e->getMessage();
             echo htmlentities("Connection failed: $errorMsg");
         }
     }
@@ -131,7 +131,7 @@ class Database
         $jsonNewRows = json_decode($jsonNewRows, true);
         if (is_array($jsonNewRows)) {
             if (is_null($jsonNewRows[0])) { // not in json format
-            	$jsonNewRows = [$jsonNewRows];
+                $jsonNewRows = [$jsonNewRows];
             }
 
             $connection = self::getConnectionWrite($database);
@@ -169,7 +169,7 @@ class Database
     {
         if (!empty($tablename) && !empty($jsonNewRow)) {
             require_once __DIR__.'/../data/string.php';
-            
+
             if (is_array($jsonNewRow)) {
                 $jsonNewRow = json_encode($jsonNewRow);
             }
@@ -211,6 +211,7 @@ class Database
 
                 if ($stmt->execute()) {
                     $rowsUpdated = $stmt->rowCount();
+
                     return "$rowsUpdated record(s) successfully updated";
                 }
 
@@ -226,7 +227,7 @@ class Database
     public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreIfDuplicate = false)
     {
         if (!empty($tablename) && !empty($whereQuery)) {
-        	$sql = "DELETE FROM $tablename WHERE $whereQuery";
+            $sql = "DELETE FROM $tablename WHERE $whereQuery";
             if ($ignoreIfDuplicate) {
                 $sql = "DELETE IGNORE FROM $tablename WHERE $whereQuery";
             }
