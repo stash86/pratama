@@ -211,11 +211,7 @@ class Database
 
                 if ($stmt->execute()) {
                     $rowsUpdated = $stmt->rowCount();
-                    if ($rowsUpdated > 0) {
-                        return "$rowsUpdated record(s) successfully updated";
-                    }
-
-                    return 'no record updated';
+                    return "$rowsUpdated record(s) successfully updated";
                 }
 
                 return 'update failed: '.$connection->errorInfo();
@@ -243,21 +239,17 @@ class Database
                 }
                 $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
                 $jsonWhereParams = json_decode($jsonWhereParams, true);
-                if (isset($jsonWhereParams[0])) {
-                    $rowsDeleted = 0;
-                    foreach ($jsonWhereParams as &$baris) {
-                        foreach ($baris as $key => &$val) {
-                            $stmt->bindParam(':'.$key, $val);
-                        }
-                        $stmt->execute();
-                        $rowsDeleted += $stmt->rowCount();
-                    }
-                } else {
-                    foreach ($jsonWhereParams as $key => &$val) {
+                if (!isset($jsonWhereParams[0])) {
+                    $jsonWhereParams = [$jsonWhereParams];
+                }
+
+                $rowsDeleted = 0;
+                foreach ($jsonWhereParams as &$baris) {
+                    foreach ($baris as $key => &$val) {
                         $stmt->bindParam(':'.$key, $val);
                     }
                     $stmt->execute();
-                    $rowsDeleted = $stmt->rowCount();
+                    $rowsDeleted += $stmt->rowCount();
                 }
             } else {
                 $stmt->execute();
