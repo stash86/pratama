@@ -230,48 +230,45 @@ class Database
     public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreIfDuplicate = false)
     {
         if (!empty($tablename) && !empty($whereQuery)) {
-                if ($ignoreIfDuplicate) {
-                    $sql = "DELETE IGNORE FROM $tablename WHERE $whereQuery";
-                } else {
-                    $sql = "DELETE FROM $tablename WHERE $whereQuery";
+        	$sql = "DELETE FROM $tablename WHERE $whereQuery";
+            if ($ignoreIfDuplicate) {
+                $sql = "DELETE IGNORE FROM $tablename WHERE $whereQuery";
+            }
+            $connection = self::getConnectionWrite($database);
+            $stmt = $connection->prepare($sql);
+            if (!empty($jsonWhereParams)) {
+                require_once __DIR__.'/../data/string.php';
+                if (is_array($jsonWhereParams)) {
+                    $jsonWhereParams = json_encode($jsonWhereParams);
                 }
-                $connection = self::getConnectionWrite($database);
-                $stmt = $connection->prepare($sql);
-                if (!empty($jsonWhereParams)) {
-                    require_once __DIR__.'/../data/string.php';
-                    if (is_array($jsonWhereParams)) {
-                        $tempParams = json_encode($jsonWhereParams);
-                    } else {
-                        $tempParams = $jsonWhereParams;
-                    }
-                    $tempParams = replaceSpecialChars($tempParams);
-                    $arrayParams = json_decode($tempParams, true);
-                    if (isset($arrayParams[0])) {
-                        $rowsDeleted = 0;
-                        foreach ($arrayParams as &$baris) {
-                            foreach ($baris as $key => &$val) {
-                                $stmt->bindParam(':'.$key, $val);
-                            }
-                            $stmt->execute();
-                            $rowsDeleted += $stmt->rowCount();
-                        }
-                    } else {
-                        foreach ($arrayParams as $key => &$val) {
+                $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
+                $jsonWhereParams = json_decode($jsonWhereParams, true);
+                if (isset($jsonWhereParams[0])) {
+                    $rowsDeleted = 0;
+                    foreach ($jsonWhereParams as &$baris) {
+                        foreach ($baris as $key => &$val) {
                             $stmt->bindParam(':'.$key, $val);
                         }
                         $stmt->execute();
-                        $rowsDeleted = $stmt->rowCount();
+                        $rowsDeleted += $stmt->rowCount();
                     }
                 } else {
+                    foreach ($jsonWhereParams as $key => &$val) {
+                        $stmt->bindParam(':'.$key, $val);
+                    }
                     $stmt->execute();
                     $rowsDeleted = $stmt->rowCount();
                 }
+            } else {
+                $stmt->execute();
+                $rowsDeleted = $stmt->rowCount();
+            }
 
-                if ($rowsDeleted > 0) {
-                    return "$rowsDeleted rows successfully deleted.";
-                }
+            if ($rowsDeleted > 0) {
+                return "$rowsDeleted rows successfully deleted.";
+            }
 
-                return 'delete failed: '.$connection->errorInfo();
+            return 'delete failed: '.$connection->errorInfo();
         }
 
         return 'Please provide all the required inputs';
