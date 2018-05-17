@@ -168,11 +168,11 @@ class Database
         $sqlQuery = "UPDATE $tablename SET ";
 
         foreach ($jsonNewRow as $key => &$val) {
+        	$tempSQL = "$key=:".$key.'_update,';
             if (empty($val)) {
-                $sqlQuery .= "$key = DEFAULT,";
-            } else {
-                $sqlQuery .= "$key=:".$key.'_update,';
+                $tempSQL = "$key = DEFAULT,";
             }
+            $sqlQuery .= $tempSQL;
         }
 
         $sqlQuery = rtrim($sqlQuery, ',');
@@ -194,13 +194,9 @@ class Database
             }
         }
 
-        if ($stmt->execute()) {
-            $rowsUpdated = $stmt->rowCount();
-
-            return "$rowsUpdated record(s) successfully updated";
-        }
-
-        return 'update failed: '.$connection->errorInfo();
+        $stmt->execute();
+        $rowsUpdated = $stmt->rowCount();
+        return "$rowsUpdated record(s) successfully updated. The error(s) : ".$connection->errorInfo();
     }
 
     public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreError = false)
