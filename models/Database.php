@@ -90,9 +90,7 @@ class Database
             $connection = self::getConnectionRead($database);
             $stmt = $connection->prepare($sqlQuery);
             if (!empty($jsonParams)) {
-                if (is_array($jsonParams)) {
-                    $jsonParams = json_encode($jsonParams);
-                }
+                $jsonParams = json_encode($jsonParams);
                 $jsonParams = replaceSpecialChars($jsonParams);
                 $jsonParams = json_decode($jsonParams, true);
 
@@ -120,46 +118,39 @@ class Database
         }
 
         require_once __DIR__.'/../data/string.php';
-        if (is_array($jsonNewRows)) {
-            $jsonNewRows = json_encode($jsonNewRows);
-        }
-
+        $jsonNewRows = json_encode($jsonNewRows);
         $jsonNewRows = replaceSpecialChars($jsonNewRows);
         $jsonNewRows = json_decode($jsonNewRows, true);
-        if (is_array($jsonNewRows)) {
-            if (is_null($jsonNewRows[0])) { // not in json format
-                $jsonNewRows = [$jsonNewRows];
-            }
-
-            $connection = self::getConnectionWrite($database);
-
-            $sqlQuery = "INSERT INTO $tablename";
-            if ($ignoreIfDuplicate) {
-                $sqlQuery = "INSERT IGNORE INTO $tablename";
-            }
-
-            $dataColumns = array_keys($jsonNewRows[0]);
-            $sqlQuery .= ' (`'.implode($dataColumns, '`, `').'`) ';
-            $sqlQuery .= ' VALUES (:'.implode($dataColumns, ', :').')';
-
-            $stmt = $connection->prepare($sqlQuery);
-
-            foreach ($jsonNewRows as $data) {
-                foreach ($data as $key => &$val) {
-                    $stmt->bindParam(':'.$key, $val);
-                }
-                if (!($stmt->execute())) {
-                    $errorLog .= 'insert failed: '.$connection->errorInfo().PHP_EOL;
-                }
-            }
-            if (empty($errorLog)) {
-                return 'Insert success.';
-            }
-
-            return $errorLog;
+        if (is_null($jsonNewRows[0])) { // not in json format
+            $jsonNewRows = [$jsonNewRows];
         }
 
-        return 'Please provide the new data in json format';
+        $connection = self::getConnectionWrite($database);
+
+        $sqlQuery = "INSERT INTO $tablename";
+        if ($ignoreIfDuplicate) {
+            $sqlQuery = "INSERT IGNORE INTO $tablename";
+        }
+
+        $dataColumns = array_keys($jsonNewRows[0]);
+        $sqlQuery .= ' (`'.implode($dataColumns, '`, `').'`) ';
+        $sqlQuery .= ' VALUES (:'.implode($dataColumns, ', :').')';
+
+        $stmt = $connection->prepare($sqlQuery);
+
+        foreach ($jsonNewRows as $data) {
+            foreach ($data as $key => &$val) {
+                $stmt->bindParam(':'.$key, $val);
+            }
+            if (!($stmt->execute())) {
+                $errorLog .= 'insert failed: '.$connection->errorInfo().PHP_EOL;
+            }
+        }
+        if (empty($errorLog)) {
+            return 'Insert success.';
+        }
+
+        return $errorLog;
     }
 
     public static function update($database, $tablename, $jsonNewRow, $whereQuery = '', $jsonWhereParams = '')
@@ -170,9 +161,7 @@ class Database
 
         require_once __DIR__.'/../data/string.php';
 
-        if (is_array($jsonNewRow)) {
-            $jsonNewRow = json_encode($jsonNewRow);
-        }
+        $jsonNewRow = json_encode($jsonNewRow);
         $jsonNewRow = replaceSpecialChars($jsonNewRow);
         $jsonNewRow = json_decode($jsonNewRow, true);
 
@@ -198,9 +187,7 @@ class Database
             }
         }
         if (!empty($jsonWhereParams)) {
-            if (is_array($jsonWhereParams)) {
-                $jsonWhereParams = json_encode($jsonWhereParams);
-            }
+            $jsonWhereParams = json_encode($jsonWhereParams);
             $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
             foreach (json_decode($jsonWhereParams, true) as $key => &$val) {
                 $stmt->bindParam(':'.$key, $val);
@@ -229,9 +216,7 @@ class Database
         $connection = self::getConnectionWrite($database);
         $stmt = $connection->prepare($sql);
         require_once __DIR__.'/../data/string.php';
-        if (is_array($jsonWhereParams)) {
-            $jsonWhereParams = json_encode($jsonWhereParams);
-        }
+        $jsonWhereParams = json_encode($jsonWhereParams);
         $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
         $jsonWhereParams = json_decode($jsonWhereParams, true);
         if (!isset($jsonWhereParams[0])) {
