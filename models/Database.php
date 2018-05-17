@@ -43,7 +43,7 @@ class Database
     public static function select($database, $columns, $tables, $where = '', $jsonParams = '', $groupBy = '', $having = '', $order = '', $limit = 0, $offset = 0, $columnData = false)
     {
         if (!empty($database) && !empty($tables)) {
-        	$sql = "SELECT * FROM $tables";
+            $sql = "SELECT * FROM $tables";
             if (!empty($columns)) {
                 $sql = "SELECT $columns FROM $tables";
             }
@@ -156,7 +156,7 @@ class Database
     public static function update($database, $tablename, $jsonNewRow, $whereQuery = '', $jsonWhereParams = '')
     {
         if (empty($database) || empty($tablename) || empty($jsonNewRow) || empty($whereQuery)) {
-        	return 'Please provide all the required data';
+            return 'Please provide all the required data';
         }
 
         require_once __DIR__.'/../data/string.php';
@@ -206,7 +206,7 @@ class Database
     public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreError = false)
     {
         if (empty($database) || empty($tablename) || empty($whereQuery) || empty($jsonWhereParams)) {
-        	return 'Please provide all the required inputs';
+            return 'Please provide all the required inputs';
         }
 
         $sql = "DELETE FROM $tablename WHERE $whereQuery";
@@ -243,6 +243,7 @@ class Database
             }
 
             $currentpage = max(1, intval($currentpage));
+
             return ($currentpage - 1) * intval($limit);
         }
 
