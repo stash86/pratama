@@ -168,7 +168,7 @@ class Database
         $sqlQuery = "UPDATE $tablename SET ";
 
         foreach ($jsonNewRow as $key => &$val) {
-        	$tempSQL = "$key=:".$key.'_update,';
+            $tempSQL = "$key=:".$key.'_update,';
             if (empty($val)) {
                 $tempSQL = "$key = DEFAULT,";
             }
@@ -196,6 +196,7 @@ class Database
 
         $stmt->execute();
         $rowsUpdated = $stmt->rowCount();
+
         return "$rowsUpdated record(s) successfully updated. The error(s) : ".$connection->errorInfo();
     }
 
