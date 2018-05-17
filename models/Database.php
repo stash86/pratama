@@ -43,10 +43,9 @@ class Database
     public static function select($database, $columns, $tables, $where = '', $jsonParams = '', $groupBy = '', $having = '', $order = '', $limit = 0, $offset = 0, $columnData = false)
     {
         if (!empty($database) && !empty($tables)) {
+        	$sql = "SELECT * FROM $tables";
             if (!empty($columns)) {
                 $sql = "SELECT $columns FROM $tables";
-            } else {
-                $sql = "SELECT * FROM $tables";
             }
 
             if (!empty($where)) {
@@ -92,14 +91,12 @@ class Database
             $stmt = $connection->prepare($sqlQuery);
             if (!empty($jsonParams)) {
                 if (is_array($jsonParams)) {
-                    $tempBindParams = json_encode($jsonParams);
-                } else {
-                    $tempBindParams = $jsonParams;
+                    $jsonParams = json_encode($jsonParams);
                 }
-                $tempBindParams = replaceSpecialChars($tempBindParams);
-                $arrayBindParams = json_decode($tempBindParams, true);
+                $jsonParams = replaceSpecialChars($jsonParams);
+                $jsonParams = json_decode($jsonParams, true);
 
-                foreach ($arrayBindParams as $key => &$val) {
+                foreach ($jsonParams as $key => &$val) {
                     $stmt->bindParam(':'.$key, $val);
                 }
             }
@@ -167,104 +164,90 @@ class Database
 
     public static function update($database, $tablename, $jsonNewRow, $whereQuery = '', $jsonWhereParams = '')
     {
-        if (!empty($tablename) && !empty($jsonNewRow)) {
-            require_once __DIR__.'/../data/string.php';
-
-            if (is_array($jsonNewRow)) {
-                $jsonNewRow = json_encode($jsonNewRow);
-            }
-            $jsonNewRow = replaceSpecialChars($jsonNewRow);
-            $jsonNewRow = json_decode($jsonNewRow, true);
-            if (is_array($jsonNewRow)) {
-                $sqlQuery = "UPDATE $tablename SET ";
-
-                foreach ($jsonNewRow as $key => &$val) {
-                    if (empty($val)) {
-                        $sqlQuery .= "$key = DEFAULT,";
-                    } else {
-                        $sqlQuery .= "$key=:".$key.'_update,';
-                    }
-                }
-
-                $sqlQuery = rtrim($sqlQuery, ',');
-                if (!empty($whereQuery)) {
-                    $whereQuery = replaceSpecialChars($whereQuery);
-                    $sqlQuery .= " WHERE $whereQuery";
-                }
-
-                $connection = self::getConnectionWrite($database);
-                $stmt = $connection->prepare($sqlQuery);
-                foreach ($jsonNewRow as $key => &$val) {
-                    if (!empty($val)) {
-                        $stmt->bindParam(':'.$key.'_update', $val);
-                    }
-                }
-                if (!empty($jsonWhereParams)) {
-                    if (is_array($jsonWhereParams)) {
-                        $jsonWhereParams = json_encode($jsonWhereParams);
-                    }
-                    $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
-                    foreach (json_decode($jsonWhereParams, true) as $key => &$val) {
-                        $stmt->bindParam(':'.$key, $val);
-                    }
-                }
-
-                if ($stmt->execute()) {
-                    $rowsUpdated = $stmt->rowCount();
-
-                    return "$rowsUpdated record(s) successfully updated";
-                }
-
-                return 'update failed: '.$connection->errorInfo();
-            }
-
-            return 'Data isn\'t in Array format';
+        if (empty($database) || empty($tablename) || empty($jsonNewRow) || empty($whereQuery)) {
+        	return 'Please provide all the required data';
         }
 
-        return 'Please provide all the required data';
+        require_once __DIR__.'/../data/string.php';
+
+        if (is_array($jsonNewRow)) {
+            $jsonNewRow = json_encode($jsonNewRow);
+        }
+        $jsonNewRow = replaceSpecialChars($jsonNewRow);
+        $jsonNewRow = json_decode($jsonNewRow, true);
+
+        $sqlQuery = "UPDATE $tablename SET ";
+
+        foreach ($jsonNewRow as $key => &$val) {
+            if (empty($val)) {
+                $sqlQuery .= "$key = DEFAULT,";
+            } else {
+                $sqlQuery .= "$key=:".$key.'_update,';
+            }
+        }
+
+        $sqlQuery = rtrim($sqlQuery, ',');
+        $whereQuery = replaceSpecialChars($whereQuery);
+        $sqlQuery .= " WHERE $whereQuery";
+
+        $connection = self::getConnectionWrite($database);
+        $stmt = $connection->prepare($sqlQuery);
+        foreach ($jsonNewRow as $key => &$val) {
+            if (!empty($val)) {
+                $stmt->bindParam(':'.$key.'_update', $val);
+            }
+        }
+        if (!empty($jsonWhereParams)) {
+            if (is_array($jsonWhereParams)) {
+                $jsonWhereParams = json_encode($jsonWhereParams);
+            }
+            $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
+            foreach (json_decode($jsonWhereParams, true) as $key => &$val) {
+                $stmt->bindParam(':'.$key, $val);
+            }
+        }
+
+        if ($stmt->execute()) {
+            $rowsUpdated = $stmt->rowCount();
+
+            return "$rowsUpdated record(s) successfully updated";
+        }
+
+        return 'update failed: '.$connection->errorInfo();
     }
 
-    public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreIfDuplicate = false)
+    public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreError = false)
     {
-        if (!empty($tablename) && !empty($whereQuery)) {
-            $sql = "DELETE FROM $tablename WHERE $whereQuery";
-            if ($ignoreIfDuplicate) {
-                $sql = "DELETE IGNORE FROM $tablename WHERE $whereQuery";
-            }
-            $connection = self::getConnectionWrite($database);
-            $stmt = $connection->prepare($sql);
-            if (!empty($jsonWhereParams)) {
-                require_once __DIR__.'/../data/string.php';
-                if (is_array($jsonWhereParams)) {
-                    $jsonWhereParams = json_encode($jsonWhereParams);
-                }
-                $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
-                $jsonWhereParams = json_decode($jsonWhereParams, true);
-                if (!isset($jsonWhereParams[0])) {
-                    $jsonWhereParams = [$jsonWhereParams];
-                }
-
-                $rowsDeleted = 0;
-                foreach ($jsonWhereParams as &$baris) {
-                    foreach ($baris as $key => &$val) {
-                        $stmt->bindParam(':'.$key, $val);
-                    }
-                    $stmt->execute();
-                    $rowsDeleted += $stmt->rowCount();
-                }
-            } else {
-                $stmt->execute();
-                $rowsDeleted = $stmt->rowCount();
-            }
-
-            if ($rowsDeleted > 0) {
-                return "$rowsDeleted rows successfully deleted.";
-            }
-
-            return 'delete failed: '.$connection->errorInfo();
+        if (empty($database) || empty($tablename) || empty($whereQuery) || empty($jsonWhereParams)) {
+        	return 'Please provide all the required inputs';
         }
 
-        return 'Please provide all the required inputs';
+        $sql = "DELETE FROM $tablename WHERE $whereQuery";
+        if ($ignoreError) {
+            $sql = "DELETE IGNORE FROM $tablename WHERE $whereQuery";
+        }
+        $connection = self::getConnectionWrite($database);
+        $stmt = $connection->prepare($sql);
+        require_once __DIR__.'/../data/string.php';
+        if (is_array($jsonWhereParams)) {
+            $jsonWhereParams = json_encode($jsonWhereParams);
+        }
+        $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
+        $jsonWhereParams = json_decode($jsonWhereParams, true);
+        if (!isset($jsonWhereParams[0])) {
+            $jsonWhereParams = [$jsonWhereParams];
+        }
+
+        $rowsDeleted = 0;
+        foreach ($jsonWhereParams as &$baris) {
+            foreach ($baris as $key => &$val) {
+                $stmt->bindParam(':'.$key, $val);
+            }
+            $stmt->execute();
+            $rowsDeleted += $stmt->rowCount();
+        }
+
+        return "$rowsDeleted rows successfully deleted. Error(s) happened was ".$connection->errorInfo();
     }
 
     public static function CalculateOffset($currentpage, $currentrow, $limit)
@@ -272,13 +255,10 @@ class Database
         if (!empty($limit) && intval($limit) > 0) {
             if (!empty($currentrow)) {
                 return intval($currentrow);
-            } else {
-                if (empty($currentpage) || intval($currentpage) == 0) {
-                    $currentpage = 1;
-                }
-
-                return (intval($currentpage) - 1) * intval($limit);
             }
+
+            $currentpage = max(1, intval($currentpage));
+            return ($currentpage - 1) * intval($limit);
         }
 
         return 0;
