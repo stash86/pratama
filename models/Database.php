@@ -40,8 +40,9 @@ class Database
         }
     }
 
-    public static function createSelectQuery($columns, $tables, $where = '', $groupBy = '', $having = '', $order = '', $limit = 0, $offset = 0) {
-    	$sql = "SELECT * FROM $tables";
+    public static function createSelectQuery($columns, $tables, $where = '', $groupBy = '', $having = '', $order = '', $limit = 0, $offset = 0)
+    {
+        $sql = "SELECT * FROM $tables";
         if (!empty($columns)) {
             $sql = "SELECT $columns FROM $tables";
         }
@@ -75,11 +76,7 @@ class Database
     public static function selectSingleResult($database, $column, $tables, $where = '', $jsonParams = '', $groupBy = '', $having = '', $order = '')
     {
         return json_decode(self::rawSelectQuery(
-            $database
-            , self::createSelectQuery($column, $tables, $where, $groupBy, $having, $order, 1)
-            , $jsonParams
-            , true)
-        , true)[0];
+            $database, self::createSelectQuery($column, $tables, $where, $groupBy, $having, $order, 1), $jsonParams, true), true)[0];
     }
 
     public static function rawSelectQuery($database, $sqlQuery, $jsonParams = '', $columnData = false)
@@ -93,7 +90,7 @@ class Database
                 $jsonParams = json_encode($jsonParams);
                 $jsonParams = replaceSpecialChars($jsonParams);
                 while (!is_array($jsonParams)) {
-                	$jsonParams = json_decode($jsonParams, true);
+                    $jsonParams = json_decode($jsonParams, true);
                 }
 
                 foreach ($jsonParams as $key => &$val) {
@@ -123,7 +120,7 @@ class Database
         $jsonNewRows = json_encode($jsonNewRows);
         $jsonNewRows = replaceSpecialChars($jsonNewRows);
         while (!is_array($jsonNewRows)) {
-        	$jsonNewRows = json_decode($jsonNewRows, true);
+            $jsonNewRows = json_decode($jsonNewRows, true);
         }
         if (!isset($jsonNewRows[0])) { // not in json format
             $jsonNewRows = [$jsonNewRows];
@@ -138,7 +135,7 @@ class Database
         $dataColumns = array_keys($jsonNewRows[0]);
         $sqlQuery .= ' (`'.implode('`, `', $dataColumns).'`) ';
         $sqlQuery .= ' VALUES (:'.implode(', :', $dataColumns).')';
-        
+
         $stmt = $connection->prepare($sqlQuery);
 
         foreach ($jsonNewRows as $data) {
@@ -146,7 +143,7 @@ class Database
                 $stmt->bindParam(':'.$key, $val);
             }
             if (!($stmt->execute())) {
-                $errorLog .= 'insert failed: '.implode(' ,',$connection->errorInfo()).PHP_EOL;
+                $errorLog .= 'insert failed: '.implode(' ,', $connection->errorInfo()).PHP_EOL;
             }
         }
         if (empty($errorLog)) {
@@ -167,7 +164,7 @@ class Database
         $jsonNewRow = json_encode($jsonNewRow);
         $jsonNewRow = replaceSpecialChars($jsonNewRow);
         while (!is_array($jsonNewRow)) {
-        	$jsonNewRow = json_decode($jsonNewRow, true);
+            $jsonNewRow = json_decode($jsonNewRow, true);
         }
 
         $sqlQuery = "UPDATE $tablename SET ";
@@ -195,8 +192,8 @@ class Database
             $jsonWhereParams = json_encode($jsonWhereParams);
             $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
             while (!is_array($jsonWhereParams)) {
-	        	$jsonWhereParams = json_decode($jsonWhereParams, true);
-	        }
+                $jsonWhereParams = json_decode($jsonWhereParams, true);
+            }
             foreach ($jsonWhereParams as $key => &$val) {
                 $stmt->bindParam(':'.$key, $val);
             }
@@ -205,7 +202,7 @@ class Database
         $stmt->execute();
         $rowsUpdated = $stmt->rowCount();
 
-        return "$rowsUpdated record(s) successfully updated. The error(s) : ".implode(' ,',$connection->errorInfo());
+        return "$rowsUpdated record(s) successfully updated. The error(s) : ".implode(' ,', $connection->errorInfo());
     }
 
     public static function delete($database, $tablename, $whereQuery = '', $jsonWhereParams = '', $ignoreError = false)
@@ -224,7 +221,7 @@ class Database
         $jsonWhereParams = json_encode($jsonWhereParams);
         $jsonWhereParams = replaceSpecialChars($jsonWhereParams);
         while (!is_array($jsonWhereParams)) {
-        	$jsonWhereParams = json_decode($jsonWhereParams, true);
+            $jsonWhereParams = json_decode($jsonWhereParams, true);
         }
         if (!isset($jsonWhereParams[0])) {
             $jsonWhereParams = [$jsonWhereParams];
@@ -239,7 +236,7 @@ class Database
             $rowsDeleted += $stmt->rowCount();
         }
 
-        return "$rowsDeleted rows successfully deleted. Error(s) happened was ".implode(' ,',$connection->errorInfo());
+        return "$rowsDeleted rows successfully deleted. Error(s) happened was ".implode(' ,', $connection->errorInfo());
     }
 
     public static function CalculateOffset($currentpage, $currentrow, $limit)
